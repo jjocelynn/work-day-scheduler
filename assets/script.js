@@ -1,17 +1,17 @@
 let unixCode = dayjs().unix();
 let i;
-let task = document.querySelector("#task");
-
+let task = document.getElementsByClassName("task");
+let currentTime = dayjs().format("H");
 let section = document.querySelector("#color");
+let history = [];
 // Wrap all code that interacts with the DOM in a call to jQuery to ensure that
 // the code isn't run until the browser has finished rendering all the elements
 // in the html.
 $(function () {
+
+  ////////////////duplicating the the color section node////////////
   for (i = 9; i < 17; i++) {
 
-
-    let currentTime = dayjs().format("H");
-    console.log(i + "  " + currentTime)
     if (i == currentTime) {
       $("#color").addClass("present");
       console.log(currentTime);
@@ -20,13 +20,17 @@ $(function () {
     } else {
       $("#color").addClass("past");
     }
-    
+
     $("#color").clone().appendTo("main"); //copying whole section with id of color and pasting it 8 times into the main body
     $("#color").attr("id", i); //giving all sections an id number of i
     let time = document.getElementById(i).children[0];
     time.textContent = (dayjs().set("hour", i).format("ha"));
-
   }
+  $("#color").attr("id", 17);
+  let time = document.getElementById("17").children[0];  //getting 5pm to show up because for some reason its not working in the for loop
+  time.textContent = (dayjs().set("hour", 17).format("ha"));
+
+
 
   // TODO: Add a listener for click events on the save button. This code should
   // use the id in the containing time-block as a key to save the user input in
@@ -34,12 +38,37 @@ $(function () {
   // function? How can DOM traversal be used to get the "hour-x" id of the
   // time-block containing the button that was clicked? How might the id be
   // useful when saving the description in local storage?
+
   $(".saveBtn").click(function (event) {
     event.preventDefault();
+    let hourSave = event.currentTarget; //looks over the image on thebutton
+    let btnId = hourSave.parentElement.id; //finds the id of the button pressed
+    let taskInput = document.getElementById(btnId).children[1].value.trim();
 
-    console.log("ello mate" + $("section"));
-    localStorage.setItem("task", task.value);
-    localStorage.getItem("task");
+    let taskSave = {
+      hour: btnId,
+      task: taskInput
+    };
+
+    //seeing if text is already entered for that time
+    let repeat = history.map(obj => obj.hour);
+    if (repeat.includes(btnId)) { //if it is, replace the old text with the new input
+      let index = history.filter(({hour: btnId})=>btnId); //finding the index of the old text
+      history.splice(index, 1, taskSave); //replacing that index with the new one
+    } else {
+      history.push(taskSave); //otherwise, add it to history array
+    }
+
+    console.log(history)
+
+    localStorage.setItem("time", JSON.stringify(history));
+
+    //if button is pressed, save the task in the object array of the id 
+    // if (hourSave){
+
+    // localStorage.getItem(history);
+    // }
+
 
     //for whichever section's button is pressed, save values into an object
 
