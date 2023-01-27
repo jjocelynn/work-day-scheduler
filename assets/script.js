@@ -1,122 +1,75 @@
-let unixCode = dayjs().unix();
-let i;
 let task = document.getElementsByClassName("task");
-let currentTime = dayjs().format("H");
-let section = document.querySelector("#color");
+let currentTime = dayjs().set("hour", 16).format("H");
 let history = [];
-// Wrap all code that interacts with the DOM in a call to jQuery to ensure that
-// the code isn't run until the browser has finished rendering all the elements
-// in the html.
+
 $(function () {
+  createSections();
 
-  ////////////////duplicating the the color section node////////////
-  for (i = 9; i < 17; i++) {
+  //////////////////// Display saved text ////////////////////
+  history = JSON.parse(localStorage.getItem("history")) || []; //retrieveing the stored data and making it into js object
+  let display = history.map(obj => obj.hour); //making an array of previous hours with entries
 
+  for (let j = 0; j < display.length; j++) { //going through the length of the array
+    let elementId = display[j]; //setting elementId to the values of the array
+    let previousText = document.getElementById(elementId).children[1]; //targeting the text area of each section
+    previousText.textContent = history[j].task; //displaying the values we got from history
+  }
+
+
+  //////////////////// Listening if button is clicked ////////////////////
+  $(".saveBtn").click(function (event) {
+    event.preventDefault();
+    let btnId = event.currentTarget.parentElement.id; //finds the id of the button pressed
+    let taskInput = document.getElementById(btnId).children[1].value.trim(); //getting the input value of the text
+
+    let saveTask = {  //creating an object with "hour" and "task" for each entry
+      hour: btnId,
+      task: taskInput
+    };
+
+    //seeing if text is already entered for that hour
+    let previous = history.map(obj => obj.hour); //getting an array of hours with previous text entries
+
+    if (previous.includes(btnId)) { //checks if the btnId() is already in the array
+      let index = previous.findIndex(x => x == btnId); //finding the index of the old text
+      history.splice(index, 1, saveTask); //removing the value in the previous index and replacing it with the new one
+    } else {
+      history.push(saveTask); //otherwise, add it to history array
+    }
+
+    localStorage.setItem("history", JSON.stringify(history)); //saving history list to our local storage
+  })
+
+
+  //////////////////// displaying the current date ////////////////////
+  $("#currentDay").text(dayjs().format("dddd, MMMM DD"));
+});
+
+
+
+/////////////duplicating sections and setting the color ///////////
+// https://www.w3schools.com/jsref/met_node_clonenode.asp
+
+let createSections = function () {
+
+  for (let i = 9; i < 18; i++) { //starting at 9 for 9am-5pm work day
+
+    //setting the color blocks for present(red), future(green), and past(grey)
     if (i == currentTime) {
       $("#color").addClass("present");
-      console.log(currentTime);
     } else if (i > currentTime) {
       $("#color").addClass("future");
     } else {
       $("#color").addClass("past");
     }
 
-    $("#color").clone().appendTo("main"); //copying whole section with id of color and pasting it 8 times into the main body
-    $("#color").attr("id", i); //giving all sections an id number of i
+    //duplicating the section with id="color" 9 times
+    $("#color").clone().appendTo("main"); //copying whole section node and attaching it to the main element
+    $("#color").attr("id", i); //giving all sections an id number of i (also corresponds to the hour)
+
+    //targeting each section and displaying the time in 12hr format
     let time = document.getElementById(i).children[0];
     time.textContent = (dayjs().set("hour", i).format("ha"));
   }
-  $("#color").attr("id", 17);
-  let time = document.getElementById("17").children[0];  //getting 5pm to show up because for some reason its not working in the for loop
-  time.textContent = (dayjs().set("hour", 17).format("ha"));
-
-
-
-  // TODO: Add a listener for click events on the save button. This code should
-  // use the id in the containing time-block as a key to save the user input in
-  // local storage. HINT: What does `this` reference in the click listener
-  // function? How can DOM traversal be used to get the "hour-x" id of the
-  // time-block containing the button that was clicked? How might the id be
-  // useful when saving the description in local storage?
-
-  $(".saveBtn").click(function (event) {
-    event.preventDefault();
-    let hourSave = event.currentTarget; //looks over the image on thebutton
-    let btnId = hourSave.parentElement.id; //finds the id of the button pressed
-    let taskInput = document.getElementById(btnId).children[1].value.trim();
-
-    let taskSave = {
-      hour: btnId,
-      task: taskInput
-    };
-
-    //seeing if text is already entered for that time
-    let repeat = history.map(obj => obj.hour);
-    if (repeat.includes(btnId)) { //if it is, replace the old text with the new input
-      let index = history.filter(({hour: btnId})=>btnId); //finding the index of the old text
-      history.splice(index, 1, taskSave); //replacing that index with the new one
-    } else {
-      history.push(taskSave); //otherwise, add it to history array
-    }
-
-    console.log(history)
-
-    localStorage.setItem("time", JSON.stringify(history));
-
-    //if button is pressed, save the task in the object array of the id 
-    // if (hourSave){
-
-    // localStorage.getItem(history);
-    // }
-
-
-    //for whichever section's button is pressed, save values into an object
-
-
-  })
-
-
-  // TODO: Add code to apply the past, present, or future class to each time
-  // block by comparing the id to the current hour. HINTS: How can the id
-  // attribute of each time-block be used to conditionally add or remove the
-  // past, present, and future classes? How can Day.js be used to get the
-  // current hour in 24-hour time?
-
-
-  // console.log(currentTime);
-  // console.log(JSON.stringify(time));
-  // console.log($("div"));
-
-
-
-
-
-
-  //figure out how to time difference
-
-  //if hour= time make red
-
-  //if hour > time, make green
-
-  //if hour < time, make grey
-
-  // TODO: Add code to get any user input that was saved in localStorage and set
-  // the values of the corresponding textarea elements. HINT: How can the id
-  // attribute of each time-block be used to do this?
-
-  //calling the function that makes all the rows
-
-
-  // TODO: Add code to display the current date in the header of the page.
-
-  $("#currentDay").text(dayjs().format("dddd, MMMM DD"));
-});
-
-
-
-/////////////function copying and pasting section ///////////
-// https://www.w3schools.com/jsref/met_node_clonenode.asp
-
-
-
-//let current2 = dayjs.unix(unixCode).format("h"); //12 hour time
+  $("#color").remove(); //removing the original empty section
+}
