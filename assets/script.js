@@ -1,5 +1,5 @@
 let task = document.getElementsByClassName("task");
-let currentTime = dayjs().set("hour", 16).format("H");
+let currentTime = dayjs().format("H");
 let history = [];
 
 $(function () {
